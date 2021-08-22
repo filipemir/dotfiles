@@ -296,6 +296,6 @@ open -a "Docker"
 
 # Print final todos:
 glow "${HOME}/my-licenses/README.md"
-glow "${HOME}/dotfiles/post-macos-install.md"
+glow "${HOME}/dotfiles/misc/post-macos-install.md"
 
 log "👏 All set! Except for ^"
