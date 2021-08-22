@@ -199,7 +199,8 @@ log "⚙️  Setting Brave to be the default browser"
 defaultbrowser browser
 
 log "⚙️  Configuring Rectangle"
-ln -sf "${HOME}/dotfiles/configs/rectangle/com.knollsoft.Rectangle.plist" "${HOME}/Library/Preferences/com.knollsoft.Rectangle.plist"
+# Sadly symlinks appear to be overriden when plist's change, so a copy will have to do:
+cp "${HOME}/dotfiles/configs/rectangle/com.knollsoft.Rectangle.plist" "${HOME}/Library/Preferences/com.knollsoft.Rectangle.plist"
 
 
 # --------------- Configuring mac settings and apps -------------------------- #
