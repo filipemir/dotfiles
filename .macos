@@ -297,9 +297,10 @@ open -a "Google Drive"
 open -a "Spotify"
 open -a "Postman"
 open -a "Docker"
+open -a "WhatsApp"
 
 # Print final todos:
-glow "${HOME}/my-licenses/README.md"
 glow "${HOME}/dotfiles/misc/post-macos-install.md"
+glow "${HOME}/my-licenses/README.md"
 
-log "👏 All set! Except for ^"
+log "👏 All set! Except for the manual steps above ^"
