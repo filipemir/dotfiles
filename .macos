@@ -1,0 +1,289 @@
+#!/usr/bin/env bash
+
+# Sources:
+# ~ https://mths.be/macos
+# ~ https://github.com/kentcdodds/dotfiles/blob/main/.macos
+# Run without downloading:
+# curl https://raw.githubusercontent.com/filipemir/dotfiles/HEAD/.macos | bash
+
+
+# ------------------------- Initial Setup ------------------------------------ #
+
+# Defining a few helper functions
+
+NOCOLOR='\033[0m'
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+ORANGE='\033[0;33m'
+
+log() {
+  echo -e "${GREEN}${1}${NOCOLOR}" 
+}
+
+warn() {
+  echo -e "⚠️  ${ORANGE}${1}${NOCOLOR}" 
+}
+
+error() {
+  echo -e "🚨 ${RED}${1}${NOCOLOR}" 
+}
+
+log "👋 Hello $(whoami)! Let's get you set up."
+log "🔑 I'll need admin access to proceed"
+
+# Ask for the administrator password upfront
+sudo -v
+
+# Keep-alive: update existing `sudo` time stamp until `.macos` has finished
+while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
+
+# Close any open System Preferences panes, to prevent them from overriding
+# settings we’re about to change
+osascript -e 'tell application "System Preferences" to quit'
+
+log "🗂  Creating a few folders"
+mkdir -p "${HOME}/dev"
+mkdir -p "${HOME}/screenshots"
+mkdir -p "${HOME}/gd"
+
+# --------------------- Installing dependencies ------------------------------ #
+
+log "⚙️  Installing dependencies"
+
+if ! brew -v >/dev/null; then
+  log "⚙️  Installing homebrew (https://brew.sh)"
+  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+  echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> /Users/filipe/.zprofile
+  eval "$(/opt/homebrew/bin/brew shellenv)"
+fi
+
+log "⚙️  Installing various CLIs and terminal utilities with brew"
+brew install git tree n mas zsh zsh-autosuggestions romkatv/powerlevel10k/powerlevel10k defaultbrowser glow
+
+# Login to app store
+# (workaround until mas-cli can signin directly, src: https://github.com/mas-cli/mas/issues/164#issuecomment-860177723)
+if ! mas account >/dev/null; then
+    log "We need to sign into the app store to proceed."
+    log "👨‍💻 Please open App Store and sign in using your Apple ID. I'll wait."
+    until mas account >/dev/null; do
+        sleep 5
+    done
+fi
+
+log "⚙️  Installing apps through app store"
+# Fantastical:
+mas install 975937182
+# 1Password:
+mas install 1333542190
+# Todoist (https://todoist.com/):
+mas install 585829637
+# Craft:
+mas install 1487937127
+# Amphetamine (https://roaringapps.com/app/amphetamine):
+mas install 937984704
+# WhatsApp:
+mas install 1147396723
+# Slack:
+mas install 803453959
+
+log "⚙️  Installing some more apps with brew cask"
+brew install --cask google-chrome firefox brave-browser rectangle \
+google-drive visual-studio-code flux alfred sublime-text vlc zoom \
+docker postman sketch suspicious-package spotify iterm2
+
+log "⚙️  Installing node:"
+sudo n latest
+
+echo "node version: $(node --version)"
+echo "npm version: $(npm --version)"
+
+log "⚙️  Installing a few global npm packages"
+sudo npm install --global serve fkill-cli n yarn
+
+if [ ! -e $ZSH/oh-my-zsh.sh ]; then
+  log "⚙️  Installing oh-my-zsh"
+  sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+fi
+
+if ! ls -R ~/Library/Fonts | grep "Meslo" >/dev/null; then
+  log "⚙️  Installing fonts needed by Powerlevel10K ZSH theme"
+  cd ~/Library/Fonts && { 
+      curl -O 'https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Regular.ttf'
+      curl -O 'https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Bold.ttf'
+      curl -O 'https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Bold%20Italic.ttf'
+      cd -; }
+fi
+
+
+# --------------------- Configuring environment ------------------------------ #
+
+log "💻 Configuring machine"
+
+if ! ls ~/.ssh/id_ed25519 >/dev/null; then
+  log "🔑 Generating a new SSH key for GitHub"
+  ssh-keygen -t ed25519 -C "filipe@fmpm.dev" -f ~/.ssh/id_ed25519 -N ''
+  eval "$(ssh-agent -s)"
+  touch ~/.ssh/config
+  echo "Host *\n AddKeysToAgent yes\n UseKeychain yes\n IdentityFile ~/.ssh/id_ed25519" | tee ~/.ssh/config
+  ssh-add -K ~/.ssh/id_ed25519
+fi
+
+pbcopy < ~/.ssh/id_ed25519.pub
+log "New SSH key needs to go into GitHub"
+log "Public key added to clipboard:"
+cat ~/.ssh/id_ed25519.pub
+log "👨‍💻 Paste it here:  https://github.com/settings/ssh/new"
+read -p "Press enter once you're done." < /dev/tty
+
+get_updated_repo() {
+  local repo_name=$1
+  local repo_dir="${HOME}/$repo_name"
+  if [ -e "$repo_dir" ]; then
+    log "⚙️  Updating $repo_name repo" 
+    cd "$repo_dir" && { 
+        git pull origin main
+        cd -; }
+  else
+    repo_uri="git@github.com:filipemir/$repo_name.git"
+    log "⚙️  Cloning $repo_uri into $repo_dir" 
+    git clone git@github.com:filipemir/$repo_name.git "$repo_dir"
+  fi
+}
+
+get_updated_repo "dotfiles"
+# Repo with alfred settings:
+get_updated_repo "alfred"
+# Repo with license codes:
+get_updated_repo "my-licenses"
+
+write_dotfile() {
+    local src="${HOME}/dotfiles/$1"
+    local target="${HOME}/$1" 
+    log "⚙️  Writing $target"
+    if [ -e $target ]; then
+        local timestamp=$(date +%d-%m-%Y_%H-%M-%S)
+        local backup_file="$target-$timestamp"
+        warn "$target already exists and will be overwritten. Backing it up to $backup_file."
+        cp -L $target $backup_file
+    fi 
+    ln -sf $src $target 
+}
+
+write_dotfile ".zshrc"
+write_dotfile ".p10k.zsh"
+write_dotfile ".gitconfig"
+write_dotfile ".gitignore_global"
+
+log "⚙️  Configuring iterm's preferences"
+defaults write com.googlecode.iterm2.plist PrefsCustomFolder ~/dotfiles/configs/iterm
+defaults write com.googlecode.iterm2.plist LoadPrefsFromCustomFolder -bool true
+
+log "⚙️  Configuring Alfred"
+alfred_dir="${HOME}/Library/Application Support/Alfred"
+mkdir -p $alfred_dir
+cp -r "${HOME}/alfred/prefs.json" $alfred_dir
+
+log "⚙️  Setting Brave to be the default browser"
+defaultbrowser browser
+
+
+# --------------- Configuring mac settings and apps -------------------------- #
+
+log "⚙️  Configuring mac's preferences"
+
+# Disable the sound effects on boot
+sudo nvram SystemAudioVolume=" "
+sudo nvram StartupMute=1
+
+# Automatically quit printer app once the print jobs complete
+defaults write com.apple.print.PrintingPrefs "Quit When Finished" -bool true
+
+# Dock: Set a small tile size, turn on magnification on hover, and auto-hide it:
+defaults write com.apple.dock tilesize -integer 30;
+defaults write com.apple.dock autohide -integer 1;
+defaults write com.apple.dock magnification -integer 1;
+
+# Dock: Wipe all (default) app icons 
+defaults write com.apple.dock persistent-apps -array
+
+# Dock: Show only open applications
+defaults write com.apple.dock static-only -bool true
+
+# Dock: Don’t show recent applications
+defaults write com.apple.dock show-recents -bool false
+
+# Save screenshots to the screenshots folder
+defaults write com.apple.screencapture location -string "${HOME}/screenshots"
+
+# Disable cmd + spacebar shortcut for Spotlight (since I use Alfred for that)
+defaults write com.apple.symbolichotkeys.plist AppleSymbolicHotKeys -dict-add 64 "
+  <dict>
+    <key>enabled</key><false/>
+    <key>value</key><dict>
+      <key>type</key><string>standard</string>
+      <key>parameters</key>
+      <array>
+        <integer>32</integer>
+        <integer>49</integer>
+        <integer>1048576</integer>
+      </array>
+    </dict>
+  </dict>
+"
+
+# Finder: allow quitting via ⌘ + Q; doing so will also hide desktop icons
+defaults write com.apple.finder QuitMenuItem -bool true
+
+# Finder: show all filename extensions
+defaults write NSGlobalDomain AppleShowAllExtensions -bool true
+
+# Finder: Always show hidden files
+defaults write com.apple.finder AppleShowAllFiles -bool true
+
+# Always show user library folder
+chflags nohidden ~/Library/
+
+# Reactivate settings so changes to hotkeys will apply without reboot:
+# (src: https://zameermanji.com/blog/2021/6/8/applying-com-apple-symbolichotkeys-changes-instantaneously/)
+/System/Library/PrivateFrameworks/SystemAdministration.framework/Resources/activateSettings -u
+
+
+# ---------------------------- Wrap up --------------------------------------- #
+
+log "⚙️  Rebooting some affected apps"
+for app in "Activity Monitor" \
+  "Address Book" \
+  "Calendar" \
+  "cfprefsd" \
+  "Contacts" \
+  "Dock" \
+  "Finder" \
+  "Mail" \
+  "Messages" \
+  "Photos" \
+  "Safari" \
+  "SystemUIServer" \
+  "iCal"; do
+  killall "${app}" &> /dev/null
+done
+
+log "⚙️  Opening up apps that require manual setup"
+open -a "Alfred 4"
+open -a "1Password 7"
+open -a "Brave Browser"
+open -a "flux"
+open -a "Craft"
+open -a "Rectangle"
+open -a "Sketch"
+open -a "Todoist"
+open -a "Amphetamine"
+open -a "Google Drive"
+open -a "Spotify"
+open -a "Postman"
+open -a "Docker"
+
+# Print final todos:
+glow "${HOME}/my-licenses/README.md"
+glow "${HOME}/dotfiles/post-macos-install.md"
+
+log "👏 All set! Except for ^"
