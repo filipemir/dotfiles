@@ -87,7 +87,7 @@ log "New SSH key needs to go into GitHub"
 log "Public key added to clipboard:"
 cat ~/.ssh/id_ed25519.pub
 log "👨‍💻 Paste it in GitHub settings"
-open("https://github.com/settings/ssh/new")
+open "https://github.com/settings/ssh/new"
 read -p "Press enter once you're done." < /dev/tty
 
 
