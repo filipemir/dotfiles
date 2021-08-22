@@ -46,9 +46,8 @@ mkdir -p "${HOME}/dev"
 mkdir -p "${HOME}/screenshots"
 mkdir -p "${HOME}/gd"
 
-# --------------------- Installing dependencies ------------------------------ #
 
-log "⚙️  Installing dependencies"
+# --------------------- Installing preliminary dependencies ------------------ #
 
 if ! brew -v >/dev/null; then
   log "⚙️  Installing homebrew (https://brew.sh)"
@@ -57,8 +56,11 @@ if ! brew -v >/dev/null; then
   eval "$(/opt/homebrew/bin/brew shellenv)"
 fi
 
-log "⚙️  Installing various CLIs and terminal utilities with brew"
-brew install git tree n mas zsh zsh-autosuggestions romkatv/powerlevel10k/powerlevel10k defaultbrowser glow
+log "⚙️  Installing git and the app store cli"
+brew install git mas
+
+
+# --------------------- Actions requiring user input ------------------------- #
 
 # Login to app store
 # (workaround until mas-cli can signin directly, src: https://github.com/mas-cli/mas/issues/164#issuecomment-860177723)
@@ -69,6 +71,32 @@ if ! mas account >/dev/null; then
         sleep 5
     done
 fi
+
+# Issue SSH key for github
+if ! ls ~/.ssh/id_ed25519 >/dev/null; then
+  log "🔑 Generating a new SSH key for GitHub"
+  ssh-keygen -t ed25519 -C "filipe@fmpm.dev" -f ~/.ssh/id_ed25519
+  eval "$(ssh-agent -s)"
+  touch ~/.ssh/config
+  echo "Host *\n AddKeysToAgent yes\n UseKeychain yes\n IdentityFile ~/.ssh/id_ed25519" | tee ~/.ssh/config
+  ssh-add -K ~/.ssh/id_ed25519
+fi
+
+pbcopy < ~/.ssh/id_ed25519.pub
+log "New SSH key needs to go into GitHub"
+log "Public key added to clipboard:"
+cat ~/.ssh/id_ed25519.pub
+log "👨‍💻 Paste it in GitHub settings"
+open("https://github.com/settings/ssh/new")
+read -p "Press enter once you're done." < /dev/tty
+
+
+# --------------------- Installing dependencies ------------------------------ #
+
+log "⚙️  Installing dependencies"
+
+log "⚙️  Installing rosetta"
+/usr/sbin/softwareupdate --install-rosetta --agree-to-license
 
 log "⚙️  Installing apps through app store"
 # Fantastical:
@@ -86,6 +114,9 @@ mas install 1147396723
 # Slack:
 mas install 803453959
 
+log "⚙️  Installing various CLIs and terminal utilities with brew"
+brew install tree n zsh zsh-autosuggestions romkatv/powerlevel10k/powerlevel10k defaultbrowser glow
+
 log "⚙️  Installing some more apps with brew cask"
 brew install --cask google-chrome firefox brave-browser rectangle \
 google-drive visual-studio-code flux alfred sublime-text vlc zoom \
@@ -93,9 +124,6 @@ docker postman sketch suspicious-package spotify iterm2
 
 log "⚙️  Installing node:"
 sudo n latest
-
-echo "node version: $(node --version)"
-echo "npm version: $(npm --version)"
 
 log "⚙️  Installing a few global npm packages"
 sudo npm install --global serve fkill-cli n yarn
@@ -118,22 +146,6 @@ fi
 # --------------------- Configuring environment ------------------------------ #
 
 log "💻 Configuring machine"
-
-if ! ls ~/.ssh/id_ed25519 >/dev/null; then
-  log "🔑 Generating a new SSH key for GitHub"
-  ssh-keygen -t ed25519 -C "filipe@fmpm.dev" -f ~/.ssh/id_ed25519 -N ''
-  eval "$(ssh-agent -s)"
-  touch ~/.ssh/config
-  echo "Host *\n AddKeysToAgent yes\n UseKeychain yes\n IdentityFile ~/.ssh/id_ed25519" | tee ~/.ssh/config
-  ssh-add -K ~/.ssh/id_ed25519
-fi
-
-pbcopy < ~/.ssh/id_ed25519.pub
-log "New SSH key needs to go into GitHub"
-log "Public key added to clipboard:"
-cat ~/.ssh/id_ed25519.pub
-log "👨‍💻 Paste it here:  https://github.com/settings/ssh/new"
-read -p "Press enter once you're done." < /dev/tty
 
 get_updated_repo() {
   local repo_name=$1
@@ -181,7 +193,7 @@ defaults write com.googlecode.iterm2.plist LoadPrefsFromCustomFolder -bool true
 log "⚙️  Configuring Alfred"
 alfred_dir="${HOME}/Library/Application Support/Alfred"
 mkdir -p $alfred_dir
-cp -r "${HOME}/alfred/prefs.json" $alfred_dir
+ln -sf "${HOME}/alfred/*" $alfred_dir
 
 log "⚙️  Setting Brave to be the default browser"
 defaultbrowser browser
