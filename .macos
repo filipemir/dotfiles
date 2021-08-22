@@ -198,6 +198,9 @@ ln -sf "${HOME}/alfred/*" $alfred_dir
 log "⚙️  Setting Brave to be the default browser"
 defaultbrowser browser
 
+log "⚙️  Configuring Rectangle"
+ln -sf "${HOME}/dotfiles/config/rectangle/com.knollsoft.Rectangle.plist" "${HOME}/Library/Preferences/com.knollsoft.Rectangle.plist"
+
 
 # --------------- Configuring mac settings and apps -------------------------- #
 
