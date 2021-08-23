@@ -203,7 +203,7 @@ glow "${HOME}/my-licenses/alfred.md"
 open -a "Alfred 4"
 read -p "Press enter once you're done." < /dev/tty
 
-alfred_dir="${HOME}/Library/Application Support/Alfred"
+alfred_dir="${HOME}/Library/Application\ Support/Alfred"
 sudo rm -r "${alfred_dir}/Alfred.alfredpreferences"
 ln -sf "${HOME}/alfred/*" $alfred_dir
 killAll "Alfred" &> /dev/null
