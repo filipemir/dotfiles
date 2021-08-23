@@ -204,7 +204,7 @@ open -a "Alfred 4"
 read -p "Press enter once you're done." < /dev/tty
 
 alfred_dir="${HOME}/Library/Application Support/Alfred"
-sudo rm -r $alfred_dir/Alfred.alfredpreferences
+sudo rm -r "${alfred_dir}/Alfred.alfredpreferences"
 ln -sf "${HOME}/alfred/*" $alfred_dir
 killAll "Alfred" &> /dev/null
 killAll "Alfred Preferences" &> /dev/null
@@ -297,7 +297,8 @@ for app in "Activity Monitor" \
   "Safari" \
   "SystemUIServer" \
   "iCal" \
-  "Rectangle" &> /dev/null
+  "Rectangle"; do
+  killall "${app}" &> /dev/null
 done
 
 log "⚙️  Opening up apps that require manual setup"
