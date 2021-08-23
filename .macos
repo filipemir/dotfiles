@@ -200,7 +200,7 @@ log "⚙️  Configuring Alfred"
 # otherwise it overwrites them
 log "👉  Provide Alfred your license information (pasted below)"
 glow "${HOME}/my-licenses/alfred.md"
-open "Alfred 4"
+open -a "Alfred 4"
 read -p "Press enter once you're done." < /dev/tty
 
 alfred_dir="${HOME}/Library/Application Support/Alfred"
@@ -213,6 +213,7 @@ log "⚙️  Configuring Rectangle"
 # Need to open and do a minimal Rectangle setup before overriding configs
 # otherwise it overwrites them
 log "👉  Go ahead and give Rectangle the permissions it asks for"
+open -a "Rectangle"
 read -p "Press enter once you're done." < /dev/tty
 
 # Sadly symlinks appear to be overriden when plists change, so a copy will have to do:
