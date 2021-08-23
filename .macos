@@ -192,16 +192,30 @@ log "⚙️  Configuring iterm's preferences"
 defaults write com.googlecode.iterm2.plist PrefsCustomFolder ~/dotfiles/configs/iterm
 defaults write com.googlecode.iterm2.plist LoadPrefsFromCustomFolder -bool true
 
-log "⚙️  Configuring Alfred"
-alfred_dir="${HOME}/Library/Application Support/Alfred"
-mkdir -p $alfred_dir
-ln -sf "${HOME}/alfred/*" $alfred_dir
-
 log "⚙️  Setting Brave to be the default browser"
 defaultbrowser browser
 
+log "⚙️  Configuring Alfred"
+# Need to open and do a minimal Alfred setup before overriding preferences
+# otherwise it overwrites them
+log "👉  Provide Alfred your license information (pasted below)"
+glow "${HOME}/my-licenses/alfred.md"
+open "Alfred 4"
+read -p "Press enter once you're done." < /dev/tty
+
+alfred_dir="${HOME}/Library/Application Support/Alfred"
+sudo rm -r $alfred_dir/Alfred.alfredpreferences
+ln -sf "${HOME}/alfred/*" $alfred_dir
+killAll "Alfred" &> /dev/null
+killAll "Alfred Preferences" &> /dev/null
+
 log "⚙️  Configuring Rectangle"
-# Sadly symlinks appear to be overriden when plist's change, so a copy will have to do:
+# Need to open and do a minimal Rectangle setup before overriding configs
+# otherwise it overwrites them
+log "👉  Go ahead and give Rectangle the permissions it asks for"
+read -p "Press enter once you're done." < /dev/tty
+
+# Sadly symlinks appear to be overriden when plists change, so a copy will have to do:
 cp "${HOME}/dotfiles/configs/rectangle/com.knollsoft.Rectangle.plist" "${HOME}/Library/Preferences/com.knollsoft.Rectangle.plist"
 
 
@@ -281,8 +295,8 @@ for app in "Activity Monitor" \
   "Photos" \
   "Safari" \
   "SystemUIServer" \
-  "iCal"; do
-  killall "${app}" &> /dev/null
+  "iCal" \
+  "Rectangle" &> /dev/null
 done
 
 log "⚙️  Opening up apps that require manual setup"
@@ -300,9 +314,11 @@ open -a "Spotify"
 open -a "Postman"
 open -a "Docker"
 open -a "WhatsApp"
+open -a "iTerm"
 
 # Print final todos:
 glow "${HOME}/dotfiles/misc/post-macos-install.md"
-glow "${HOME}/my-licenses/README.md"
+glow "${HOME}/my-licenses/brave.md"
+glow "${HOME}/my-licenses/sketch.md"
 
 log "👏 All set! Except for the manual steps above ^"
