@@ -280,7 +280,6 @@ chflags nohidden ~/Library/
 # (src: https://zameermanji.com/blog/2021/6/8/applying-com-apple-symbolichotkeys-changes-instantaneously/)
 /System/Library/PrivateFrameworks/SystemAdministration.framework/Resources/activateSettings -u
 
-
 # ---------------------------- Wrap up --------------------------------------- #
 
 log "⚙️  Rebooting some affected apps"
@@ -317,6 +316,7 @@ open -a "Postman"
 open -a "Docker"
 open -a "WhatsApp"
 open -a "iTerm"
+open ~/dotfiles/misc/wallpapers
 
 # Print final todos:
 glow "${HOME}/dotfiles/misc/post-macos-install.md"

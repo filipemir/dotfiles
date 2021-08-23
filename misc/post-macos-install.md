@@ -16,4 +16,5 @@
     * Opened apps
     * Gmail
     * Other stuff?
+* Pick a wallapper
 * Reboot (unchecking "Reopen windows when logging back in")
