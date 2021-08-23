@@ -1,8 +1,6 @@
 # Manual TODOs:
 
-* Setup Alfred:
-    * Input license code (see license below)
-    * Change hotkey to `cmd + space` at `Alfred Preferences > General > Alfred Hotkey`
+* Change Alfred hotkey to `cmd + space` at `Alfred Preferences > General > Alfred Hotkey`
 * Keyboard settings at `Preferences > Keyboard > Input Sources`:
     * Add Portuguese as a keyboard input source 
     * Check "Show Input Menu in menu bar"
