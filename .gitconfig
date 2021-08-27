@@ -1,9 +1,22 @@
 [user]
 	name = Filipe Miranda
 	email = filipe@fmpm.dev
+
 [pull]
 	rebase = true
+
 [init]
 	defaultBranch = main
-[core]
-	excludesfile = /Users/filipe/.gitignore_global
+
+[pager]
+    diff = delta
+    log = delta
+    reflog = delta
+    show = delta
+
+[delta]
+    side-by-side = true
+	line-number = true
+
+[interactive]
+    diffFilter = delta --color-only
