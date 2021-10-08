@@ -7,16 +7,3 @@
 
 [init]
 	defaultBranch = main
-
-[pager]
-    diff = delta
-    log = delta
-    reflog = delta
-    show = delta
-
-[delta]
-    side-by-side = true
-	line-number = true
-
-[interactive]
-    diffFilter = delta --color-only

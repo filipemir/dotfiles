@@ -114,7 +114,7 @@ mas install 803453959
 
 log "⚙️  Installing various CLIs and terminal utilities with brew"
 brew install tree n zsh zsh-autosuggestions romkatv/powerlevel10k/powerlevel10k \
-defaultbrowser glow git-delta
+defaultbrowser glow
 
 log "⚙️  Installing some more apps with brew cask"
 brew install --cask google-chrome firefox brave-browser rectangle \
