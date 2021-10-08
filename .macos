@@ -101,12 +101,8 @@ log "⚙️  Installing rosetta"
 /usr/sbin/softwareupdate --install-rosetta --agree-to-license
 
 log "⚙️  Installing apps through app store"
-# Fantastical:
-mas install 975937182
 # 1Password:
 mas install 1333542190
-# Todoist (https://todoist.com/):
-mas install 585829637
 # Craft:
 mas install 1487937127
 # Amphetamine (https://roaringapps.com/app/amphetamine):
@@ -123,7 +119,7 @@ defaultbrowser glow git-delta
 log "⚙️  Installing some more apps with brew cask"
 brew install --cask google-chrome firefox brave-browser rectangle \
 google-drive visual-studio-code flux alfred sublime-text vlc zoom \
-docker postman sketch suspicious-package spotify iterm2
+docker postman sketch suspicious-package spotify iterm2 asana
 
 log "⚙️  Installing node:"
 sudo n latest
