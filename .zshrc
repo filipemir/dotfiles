@@ -27,8 +27,13 @@ prompt_context(){}
 
 # --------------------------------- #
 
-# If you come from bash you might have to change your $PATH.
-export PATH=$HOME/bin:/usr/local/bin:$PATH
+export PATH=$HOME/bin:$HOME/.local/bin:/usr/local/bin:$PATH
 
 bindkey '[C' forward-word
-bindkey '[D' backward-word
+bindkey '[D' backward-word 
+
+eval "$(pyenv init -)"
+
+# --------------------------------- #
+
+alias dc="docker-compose"

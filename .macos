@@ -119,7 +119,7 @@ defaultbrowser glow
 log "⚙️  Installing some more apps with brew cask"
 brew install --cask google-chrome firefox brave-browser rectangle \
 google-drive visual-studio-code flux alfred sublime-text vlc zoom \
-docker postman sketch suspicious-package spotify iterm2 asana
+docker postman sketch suspicious-package spotify iterm2 todoist tableplus
 
 log "⚙️  Installing node:"
 sudo n latest
